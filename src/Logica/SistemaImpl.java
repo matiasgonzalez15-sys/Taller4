@@ -1,5 +1,8 @@
 package Logica;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
 
 import Dominio.*;
@@ -23,7 +26,7 @@ public class SistemaImpl implements Sistema {
 	}
 
 	@Override
-	public void crearObjetos(String[] partes) {
+	public void crearObjetos(String[] partes) throws Exception {
 		if (partes.length == 0) {
 			return;
 		}
@@ -33,33 +36,59 @@ public class SistemaImpl implements Sistema {
 			VisitorPoder visitor = new VisitorCalcularPoder();
 			c.accept(visitor);
 			cartas.add(c);
+			guardarCartas();
 		}
+		
 
 	}
 
 	@Override
-	public String estrategia(EstrategiaOrdenar estrategia) {
-		String res = "";
-		List<Carta> listaEstrategia = estrategia.ordenar(cartas);
-		return res;
+	public List<Carta> estrategia(EstrategiaOrdenar estrategia) {
+		return estrategia.ordenar(cartas);
 	}
 
-	private String sacarExtras(Carta c) {
-		String extras = "";
-		if (c.getClass().getSimpleName().equalsIgnoreCase("pokemon")) {
-			Pokemon p = (Pokemon) c;
-			extras += " | Daño: " + p.getDaño() + " | Cant. Energia: " + p.getCantEnergia();
-		} else if (c.getClass().getSimpleName().equalsIgnoreCase("item")) {
-			Item i = (Item) c;
-			extras += " | Bonificacion: " + i.getBonificacion();
-		} else if (c.getClass().getSimpleName().equalsIgnoreCase("supporter")) {
-			Supporter s = (Supporter) c;
-			extras += " | Efectos Turno: " + s.getEfectosTurno();
-		} else {
-			Energy e = (Energy) c;
-			extras += " | Elemento: " + e.getElemento();
-		}
-		return extras;
+	@Override
+	public List<Carta> getCartas() {
+		return cartas;
 	}
+
+	@Override
+	public void eliminarCarta(int indice) throws Exception {
+		cartas.remove(indice);
+		guardarCartas();
+		
+	}
+
+	@Override
+	public void guardarCartas() throws Exception {
+		try(BufferedWriter bw = new BufferedWriter(new FileWriter("Sobres.txt"))){;
+			for(Carta c : cartas) {
+				String linea = c.getNombre() + ";" + c.getRareza();
+				if(c.getClass().getSimpleName().equalsIgnoreCase("pokemon")) {
+					Pokemon p = (Pokemon) c;
+					linea += ";Pokemon;" + p.getDaño() + ";" + p.getCantEnergia();
+				}
+				if(c.getClass().getSimpleName().equalsIgnoreCase("item")){
+					Item i = (Item) c;
+					linea += ";Item;" + i.getBonificacion();
+				}
+				if(c.getClass().getSimpleName().equalsIgnoreCase("supporter")) {
+					Supporter s = (Supporter) c;
+					linea += ";Supporter;" + s.getEfectosTurno();
+				}
+				if(c.getClass().getSimpleName().equalsIgnoreCase("energy")) {
+					Energy e = (Energy) c;
+					linea += ";Energy;" + e.getElemento();
+				}
+				bw.write(linea);
+				bw.newLine();
+			}
+			bw.close();
+		}
+	}	
+
+	
+
+	
 
 }

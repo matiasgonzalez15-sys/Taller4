@@ -26,7 +26,7 @@ public class App {
 	        try {
 	            sistema.crearObjetos(partes);
 	        } catch (Exception e) {
-	            System.err.println("Línea inválida, se omite: " + linea + " (" + e.getMessage() + ")");
+	            System.err.println("Linea invalida " + linea + " (" + e.getMessage() + ")");
 	        }
 	    }
 	    lector.close();
